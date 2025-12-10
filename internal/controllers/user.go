@@ -1,11 +1,13 @@
 package contollers
 
 import (
+	"fmt"
+	"net/http"
+	"strconv"
+	// middleware "github.com/Vedant-Jathar/Gin_Project/internal/midlleware"
 	"github.com/Vedant-Jathar/Gin_Project/internal/models"
 	"github.com/Vedant-Jathar/Gin_Project/internal/services"
 	"github.com/gin-gonic/gin"
-	"net/http"
-	"strconv"
 )
 
 type UserController struct {
@@ -14,6 +16,7 @@ type UserController struct {
 
 func (u *UserController) InitUserControllerRoutes(router *gin.Engine) {
 	routes := router.Group("/user")
+
 	routes.GET("/", u.GetUsers())
 	routes.GET("/:id", u.GetUserById())
 	routes.POST("/", u.CreateUser())
@@ -29,6 +32,8 @@ func (u *UserController) NewUserController(userService services.UserService) *Us
 
 func (u *UserController) GetUsers() gin.HandlerFunc {
 	return func(c *gin.Context) {
+
+		fmt.Println(c.Get("userId"))
 
 		users, err := u.UserService.GetUsers()
 
@@ -91,7 +96,15 @@ func (u *UserController) CreateUser() gin.HandlerFunc {
 			return
 		}
 
-		userId := u.UserService.CreateUser(&reqBody)
+		userId, err3 := u.UserService.CreateUser(&reqBody)
+
+		if err3 != nil {
+			c.JSON(http.StatusBadRequest, gin.H{
+				"status": false,
+				"error":  err3,
+			})
+			return
+		}
 
 		c.JSON(http.StatusOK, gin.H{
 			"status":  true,
@@ -115,6 +128,8 @@ func (u *UserController) UpdateUser() gin.HandlerFunc {
 			return
 		}
 
+		fmt.Println("-------reqBody", reqBody)
+
 		numId, err1 := strconv.Atoi(id)
 
 		if err1 != nil {
@@ -125,7 +140,9 @@ func (u *UserController) UpdateUser() gin.HandlerFunc {
 			return
 		}
 
-		err2 := u.UserService.UpdateUser(&reqBody, numId)
+		data := reqBody
+
+		err2 := u.UserService.UpdateUser(reqBody, data, numId)
 
 		if err2 != nil {
 			c.JSON(http.StatusBadRequest, gin.H{

@@ -1,4 +1,4 @@
-package student
+package types
 
 type Student struct {
 	Email string `json:"email"`

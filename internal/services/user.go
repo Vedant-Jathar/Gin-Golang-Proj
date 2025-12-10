@@ -1,9 +1,10 @@
 package services
 
 import (
+	"fmt"
+
 	"github.com/Vedant-Jathar/Gin_Project/internal/models"
 	"gorm.io/gorm"
-	"log"
 )
 
 type UserService struct {
@@ -11,14 +12,12 @@ type UserService struct {
 }
 
 func (u *UserService) NewUserService(database *gorm.DB) *UserService {
-
 	return &UserService{
 		db: database,
 	}
 }
 
 func (u *UserService) GetUsers() ([]models.User, error) {
-
 	var users []models.User
 	err := u.db.Find(&users).Error
 	return users, err
@@ -35,24 +34,26 @@ func (u *UserService) GetUserById(id int) (any, error) {
 	return user, nil
 }
 
-func (u *UserService) CreateUser(user *models.User) int {
+func (u *UserService) CreateUser(user *models.User) (any, error) {
 	result := u.db.Create(user)
 	if result.Error != nil {
-		log.Fatal("Error creating the user in the service")
+		return nil, result.Error
 	}
 
-	return user.Id
+	return user.Id, nil
 }
 
-func (u *UserService) UpdateUser(user *models.User, id int) error {
+func (u *UserService) UpdateUser(user models.User, data models.User, id int) error {
 
 	if err := u.db.First(&user, id).Error; err != nil {
 		return err // record not found OR deleted
 	}
 
+	fmt.Println("---------Data", data)
+
 	result := u.db.Model(&models.User{}).
 		Where("Id = ?", id).
-		Updates(user)
+		Updates(data)
 
 	if result.Error != nil {
 		return result.Error
@@ -62,13 +63,9 @@ func (u *UserService) UpdateUser(user *models.User, id int) error {
 }
 
 func (u *UserService) DeleteUser(id int) error {
-
-	result := u.db.Delete(&models.User{}, id)
-
+	result := u.db.Unscoped().Delete(&models.User{}, id)
 	if result.Error != nil {
 		return result.Error
 	}
-
 	return nil
-
 }
