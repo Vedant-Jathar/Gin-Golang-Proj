@@ -1,0 +1,36 @@
+
+{
+    "level": "ERROR",
+    "time": "2025-12-22T13:04:47.046+0530",
+    "caller": "midlleware/globalErrorHandlingMidddlware.go:27",
+    "msg": "Internal server error",
+    "path": "/user/",
+    "status": 500
+}
+
+{
+    "level": "ERROR",
+    "time": "2025-12-22T13:21:31.651+0530",
+    "caller": "midlleware/globalErrorHandlingMidddlware.go:27",
+    "msg": "Key: 'User.Email' Error:Field validation for 'Email' failed on the 'required' tag",
+    "path": "/user/",
+    "status": 400
+}
+
+{
+    "level": "INFO",
+    "time": "2025-12-22T13:22:23.630+0530",
+    "caller": "controllers/user.go:122",
+    "msg": "User created",
+    "path": "/user/",
+    "status": 201
+}
+
+{
+    "level": "ERROR",
+    "time": "2025-12-22T13:25:38.636+0530",
+    "caller": "midlleware/globalErrorHandlingMidddlware.go:27",
+    "msg": "record not found",
+    "path": "/user/11",
+    "status": 400
+}

@@ -1,100 +1,105 @@
-// package main
+package main
 
-// import (
-// 	contollers "github.com/Vedant-Jathar/Gin_Project/internal/controllers"
-// 	"github.com/Vedant-Jathar/Gin_Project/internal/database"
-// 	"github.com/Vedant-Jathar/Gin_Project/internal/models"
-// 	"github.com/Vedant-Jathar/Gin_Project/internal/services"
-// 	"github.com/gin-gonic/gin"
-// 	// student "github.com/Vedant-Jathar/Gin_Project/internal/types"
-// )
+import (
+	contollers "github.com/Vedant-Jathar/Gin_Project/internal/controllers"
+	"github.com/Vedant-Jathar/Gin_Project/internal/database"
+	middleware "github.com/Vedant-Jathar/Gin_Project/internal/midlleware"
+	"github.com/Vedant-Jathar/Gin_Project/internal/models"
+	"github.com/Vedant-Jathar/Gin_Project/internal/services"
+	utils "github.com/Vedant-Jathar/Gin_Project/internal/utils/logger"
+	"github.com/gin-gonic/gin"
+	// student "github.com/Vedant-Jathar/Gin_Project/internal/types"
+)
 
-// func main() {
-// 	router := gin.Default()
+func main() {
+	router := gin.Default()
+	logger := utils.InitLogger()
 
-// 	db := database.ConnectDb()
+	db := database.ConnectDb()
 
-// 	if err := db.AutoMigrate(&models.User{},&models.AuthUser{}); err != nil {
-// 		panic(err)
-// 	}
+	if err := db.AutoMigrate(&models.User{}, &models.AuthUser{}); err != nil {
+		panic(err)
+	}
 
-// 	UserSrv := services.UserService{}
-// 	newUserSrv := UserSrv.NewUserService(db)
+	router.Use(middleware.GlobalErrorHandlingMiddleware(*logger))
 
-// 	UserCtlr := contollers.UserController{}
-// 	newUserCtlr := UserCtlr.NewUserController(*newUserSrv)
-// 	newUserCtlr.InitUserControllerRoutes(router)
+	UserSrv := services.UserService{}
+	newUserSrv := UserSrv.NewUserService(db)
 
-// 	// Auth controllers:
+	UserCtlr := contollers.UserController{}
+	newUserCtlr := UserCtlr.NewUserController(*newUserSrv, *logger)
+	newUserCtlr.InitUserControllerRoutes(router)
 
-// 	authSrv := services.AuthService{}
-// 	newAuthSrv := authSrv.InitAuthservice(db)
+	// Auth controllers:
 
-// 	authCtlr := contollers.AuthController{}
-// 	newAuthCtlr := authCtlr.InitController(*newAuthSrv)
-// 	newAuthCtlr.InitRoutes(router)
+	authSrv := services.AuthService{}
+	newAuthSrv := authSrv.InitAuthservice(db)
 
-// 	router.Run(":8000")
+	authCtlr := contollers.AuthController{}
+	newAuthCtlr := authCtlr.InitController(*newAuthSrv)
+	newAuthCtlr.InitRoutes(router)
 
-// 	// router.GET("/ping", func(c *gin.Context) {
-// 	// 	c.JSON(http.StatusOK, gin.H{
-// 	// 		"status": true,
-// 	// 		"method": c.Request.Method,
-// 	// 	})
-// 	// })
+	router.Run(":8000")
 
-// 	// router.GET("/profile/:id", func(c *gin.Context) {
-// 	// 	id := c.Param("id")
-// 	// 	num_id, err := strconv.Atoi(id)
+	// router.GET("/ping", func(c *gin.Context) {
+	// 	c.JSON(http.StatusOK, gin.H{
+	// 		"status": true,
+	// 		"method": c.Request.Method,
+	// 	})
+	// })
 
-// 	// 	if err != nil {
-// 	// 		c.JSON(500, gin.H{
-// 	// 			"error": err.Error(),
-// 	// 		})
-// 	// 		return
-// 	// 	}
+	// router.GET("/profile/:id", func(c *gin.Context) {
+	// 	id := c.Param("id")
+	// 	num_id, err := strconv.Atoi(id)
 
-// 	// 	c.JSON(http.StatusOK, gin.H{
-// 	// 		"id": num_id,
-// 	// 	})
-// 	// })
+	// 	if err != nil {
+	// 		c.JSON(500, gin.H{
+	// 			"error": err.Error(),
+	// 		})
+	// 		return
+	// 	}
 
-// 	// router.POST("/user", func(c *gin.Context) {
+	// 	c.JSON(http.StatusOK, gin.H{
+	// 		"id": num_id,
+	// 	})
+	// })
 
-// 	// 	var reqBody student.Student
+	// router.POST("/user", func(c *gin.Context) {
 
-// 	// 	if err := c.BindJSON(&reqBody); err != nil {
-// 	// 		c.JSON(http.StatusBadRequest, gin.H{
-// 	// 			"error": err.Error(),
-// 	// 		})
-// 	// 		return
-// 	// 	}
+	// 	var reqBody student.Student
 
-// 	// 	c.JSON(http.StatusCreated, gin.H{
-// 	// 		"email": reqBody.Email,
-// 	// 		"name":  reqBody.Name,
-// 	// 	})
+	// 	if err := c.BindJSON(&reqBody); err != nil {
+	// 		c.JSON(http.StatusBadRequest, gin.H{
+	// 			"error": err.Error(),
+	// 		})
+	// 		return
+	// 	}
 
-// 	// })
+	// 	c.JSON(http.StatusCreated, gin.H{
+	// 		"email": reqBody.Email,
+	// 		"name":  reqBody.Name,
+	// 	})
 
-// 	// router.PUT("/user/:id", func(c *gin.Context) {
-// 	// 	id := c.Param("id")
+	// })
 
-// 	// 	var reqBody student.Student
+	// router.PUT("/user/:id", func(c *gin.Context) {
+	// 	id := c.Param("id")
 
-// 	// 	if err := c.BindJSON(&reqBody); err != nil {
-// 	// 		c.JSON(http.StatusBadRequest, gin.H{
-// 	// 			"status": false,
-// 	// 			"err":    err.Error(),
-// 	// 		})
-// 	// 		return
-// 	// 	}
+	// 	var reqBody student.Student
 
-// 	// 	c.JSON(http.StatusOK, gin.H{
-// 	// 		"id":      id,
-// 	// 		"status":  true,
-// 	// 		"reqBody": reqBody,
-// 	// 	})
-// 	// })
+	// 	if err := c.BindJSON(&reqBody); err != nil {
+	// 		c.JSON(http.StatusBadRequest, gin.H{
+	// 			"status": false,
+	// 			"err":    err.Error(),
+	// 		})
+	// 		return
+	// 	}
 
-// }
+	// 	c.JSON(http.StatusOK, gin.H{
+	// 		"id":      id,
+	// 		"status":  true,
+	// 		"reqBody": reqBody,
+	// 	})
+	// })
+
+}
